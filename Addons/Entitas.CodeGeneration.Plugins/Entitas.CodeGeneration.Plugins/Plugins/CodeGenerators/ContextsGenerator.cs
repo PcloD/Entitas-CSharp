@@ -11,7 +11,8 @@ namespace Entitas.CodeGeneration.Plugins {
         public bool runInDryMode { get { return true; } }
 
         const string CONTEXTS_TEMPLATE =
-@"public partial class Contexts : Entitas.IContexts {
+@"using System.Reflection;
+public partial class Contexts : Entitas.IContexts {
 
     public static Contexts sharedInstance {
         get {
@@ -34,8 +35,8 @@ ${contextProperties}
 ${contextAssignments}
 
         var postConstructors = System.Linq.Enumerable.Where(
-            GetType().GetMethods(),
-            method => System.Attribute.IsDefined(method, typeof(Entitas.CodeGeneration.Attributes.PostConstructorAttribute))
+            GetType().GetTypeInfo().DeclaredMethods,
+            method => method.GetCustomAttribute<Entitas.CodeGeneration.Attributes.PostConstructorAttribute>() != null
         );
 
         foreach (var postConstructor in postConstructors) {
